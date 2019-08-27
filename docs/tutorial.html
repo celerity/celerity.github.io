@@ -1,0 +1,297 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Complete Application Tutorial · Celerity</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="This section gives a walkthrough of how a simple Celerity application can be"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Complete Application Tutorial · Celerity"/><meta property="og:type" content="website"/><meta property="og:url" content="https://celerity.github.io/"/><meta property="og:description" content="This section gives a walkthrough of how a simple Celerity application can be"/><meta property="og:image" content="https://celerity.github.io/img/celerity_og_image.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://celerity.github.io/img/celerity_twitter_image.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/prism.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/celerity_icon.png" alt="Celerity"/><h2 class="headerTitleWithLogo">Celerity</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/celerity/celerity-runtime" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Introduction</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/installation">Installation</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/tutorial">Tutorial</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/range-mappers">Range Mappers</a></li><li class="navListItem"><a class="navItem" href="/docs/pitfalls">Common Pitfalls</a></li><li class="navListItem"><a class="navItem" href="/docs/issues-and-limitations">Issues &amp; Limitations</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Celerity In-Depth</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/core-principles">Core Principles</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Complete Application Tutorial</h1></header><article><div><span><p>This section gives a walkthrough of how a simple Celerity application can be
+set up from start to finish. Before you begin, make sure you have <a href="/docs/installation">built and
+installed</a> Celerity and all of its dependencies.</p>
+<p>We are going to implement a simple image processing kernel that performs edge
+detection on an input image and writes the resulting image back to the
+filesystem. Here you can see how a result might look (white parts):</p>
+<p><img src="/docs/assets/tutorial_edge_detection_flower_by_reinhold_moeller.jpg" alt=""></p>
+<p><a href="https://commons.wikimedia.org/wiki/File:Wiesenknopf_Bl%C3%BCte_6260037-PSD-PSD.jpg">Original image</a> by Reinhold Möller (CC-BY-SA 4.0).</p>
+<h2><a class="anchor" aria-hidden="true" id="setting-up-a-cmake-project"></a><a href="#setting-up-a-cmake-project" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting Up a CMake Project</h2>
+<p>The first thing you typically want to do when writing a Celerity application
+is to setup a CMake project. For this, create a new folder for your project and in it create a
+file <code>CMakeLists.txt</code> with the following contents:</p>
+<pre><code class="hljs css language-cmake"><span class="hljs-keyword">cmake_minimum_required</span>(VERSION <span class="hljs-number">3.5</span>.<span class="hljs-number">1</span>)
+<span class="hljs-keyword">project</span>(celerity_edge_detection)
+
+<span class="hljs-keyword">find_package</span>(Celerity CONFIG REQUIRED)
+
+<span class="hljs-keyword">add_executable</span>(edge_detection edge_detection.cpp)
+add_celerity_to_target(<span class="hljs-keyword">TARGET</span> edge_detection SOURCES edge_detection.cpp)
+</code></pre>
+<p>With this simple CMake configuration file we've created a new executable
+called <code>edge_detection</code> that links to Celerity. The important section is the
+call to <code>add_celerity_to_target</code>, where we specify both the target that we
+want to turn into a Celerity executable, as well as all source files that
+should be compiled for accelerator execution.</p>
+<p>Create an empty file <code>edge_detection.cpp</code> next to your <code>CMakeLists.txt</code>.
+Then, create a new folder <code>build</code> inside your project directory, navigate
+into it and simply run <code>cmake ..</code> to configure your project. Just as during
+<a href="/docs/installation">installation</a>, you might have to provide some additional
+parameters to CMake in order for it to find and/or configure Celerity and its
+dependencies.</p>
+<h2><a class="anchor" aria-hidden="true" id="image-handling-boilerplate"></a><a href="#image-handling-boilerplate" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Image Handling Boilerplate</h2>
+<p>We're going to start by adding the necessary code to load (and later save) an
+image file. To this end, we'll use the <a href="https://github.com/nothings/stb">stb</a>
+single file libraries. Download <code>stb_image.h</code> and <code>stb_image_write.h</code> from
+GitHub and drop them next to our source file.</p>
+<p>Next, add the following code to <code>edge_detection.cpp</code>:</p>
+<pre><code class="hljs css language-cpp"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;cstdlib></span></span>
+
+<span class="token macro property">#<span class="token directive keyword">define</span> STB_IMAGE_IMPLEMENTATION</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"stb_image.h"</span></span>
+<span class="token macro property">#<span class="token directive keyword">define</span> STB_IMAGE_WRITE_IMPLEMENTATION</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"stb_image_write.h"</span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">int</span> argc<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>argc <span class="token operator">!=</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token keyword">return</span> EXIT_FAILURE<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> img_width<span class="token punctuation">,</span> img_height<span class="token punctuation">;</span>
+    <span class="token keyword">uint8_t</span><span class="token operator">*</span> img_data <span class="token operator">=</span> <span class="token function">stbi_load</span><span class="token punctuation">(</span>argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>img_width<span class="token punctuation">,</span> <span class="token operator">&amp;</span>img_height<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">stbi_image_free</span><span class="token punctuation">(</span>img_data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> EXIT_SUCCESS<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>First we check that the user provided an image file name and if so, we load
+the corresponding file using <code>stbi_load()</code>. The last parameter tells stb that
+we want to load the image as grayscale. The result is then stored in an array
+of <code>uint8_t</code>, which consists of <code>img_height</code> lines of size <code>img_width</code> each.
+We then immediately free the image again and exit.</p>
+<blockquote>
+<p>Now might be a good time to compile and run the program to make sure
+everything works so far.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="celerity-queue-and-buffers"></a><a href="#celerity-queue-and-buffers" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Celerity Queue and Buffers</h2>
+<p>With everything set up, we can now begin to implement the Celerity portion of
+our application. The first thing that we will require in any Celerity program
+is the <strong>distributed queue</strong>. Similar to how a SYCL queue allows you to
+submit work to a compute device, the Celerity distributed queue allows you to
+submit work to the distributed runtime system - which will subsequently be
+split transparently across all available worker nodes.</p>
+<p>Additionally, we will require <strong>buffers</strong> to store our input image as well as
+the resulting edge-detected image in a way that can be efficiently accessed
+by the GPU. Let's create our two buffers and the distributed queue now:</p>
+<pre><code class="hljs css language-cpp"><span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;celerity/celerity.h></span></span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">uint8_t</span><span class="token operator">*</span> img_data <span class="token operator">=</span> <span class="token function">stbi_load</span><span class="token punctuation">(</span>argv<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>img_width<span class="token punctuation">,</span> <span class="token operator">&amp;</span>img_height<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+celerity<span class="token operator">::</span>buffer<span class="token operator">&lt;</span><span class="token keyword">uint8_t</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token operator">></span> <span class="token function">input_buf</span><span class="token punctuation">(</span>img_data<span class="token punctuation">,</span> cl<span class="token operator">::</span>sycl<span class="token operator">::</span>range<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span><span class="token punctuation">(</span>img_height<span class="token punctuation">,</span> img_width<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">stbi_image_free</span><span class="token punctuation">(</span>img_data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+celerity<span class="token operator">::</span>buffer<span class="token operator">&lt;</span><span class="token keyword">uint8_t</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token operator">></span> <span class="token function">edge_buf</span><span class="token punctuation">(</span>cl<span class="token operator">::</span>sycl<span class="token operator">::</span>range<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span><span class="token punctuation">(</span>img_height<span class="token punctuation">,</span> img_width<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+celerity<span class="token operator">::</span>distr_queue queue<span class="token punctuation">;</span>
+<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+</code></pre>
+<p>With this we've created two 2-dimensional buffers, <code>input_buf</code> and
+<code>edge_buf</code>, that both store values of type <code>uint8_t</code> and are of size
+<code>(img_height, img_width)</code>. Notice that we initialize <code>input_buf</code> using the
+image data that we've just read. We can then immediately free the raw image,
+as we no longer need it. <code>edge_buf</code> on the other hand is not being
+initialized with any existing data, as it will be used to store the result of
+our image processing kernel.</p>
+<h2><a class="anchor" aria-hidden="true" id="detecting-those-edges"></a><a href="#detecting-those-edges" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Detecting Those Edges</h2>
+<p>Now we are ready to do the actual edge detection. For this we will write a
+<strong>kernel function</strong> that will be executed on one or more GPUs. The way kernels
+are specified in Celerity is very similar to how it is done in SYCL:</p>
+<pre><code class="hljs css language-cpp">queue<span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">=</span><span class="token punctuation">]</span><span class="token punctuation">(</span>celerity<span class="token operator">::</span>handler<span class="token operator">&amp;</span> cgh<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// TODO: Buffer accessors</span>
+    cgh<span class="token punctuation">.</span>parallel_for<span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">MyEdgeDetectionKernel</span><span class="token operator">></span><span class="token punctuation">(</span>
+        cl<span class="token operator">::</span>sycl<span class="token operator">::</span>range<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span><span class="token punctuation">(</span>img_height <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> img_width <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        cl<span class="token operator">::</span>sycl<span class="token operator">::</span>id<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">[</span><span class="token operator">=</span><span class="token punctuation">]</span><span class="token punctuation">(</span>cl<span class="token operator">::</span>sycl<span class="token operator">::</span>item<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span> item<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// TODO: Kernel code</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>We call <code>queue.submit()</code> to inform the Celerity runtime that we want to
+execute a new kernel function. As an argument, we pass a so-called <strong>command
+group</strong>; a C++11 lambda function. Command groups themselves are not being
+executed on an accelerator. Instead, they serve as a way of tying kernels
+to buffers, informing the runtime system exactly how we plan to access
+different buffers from within our kernels. This is done through <strong>buffer
+accessors</strong>, which we will create in a minute.</p>
+<blockquote>
+<p>Attentive readers might have noticed that unlike in SYCL, Celerity command
+groups capture surrounding variables <em>by value</em> rather than by reference.
+For more information on why this is important, see <a href="/docs/pitfalls">Common
+Pitfalls</a>.</p>
+</blockquote>
+<p>The actual kernel code that will be executed on our compute device(s) resides
+within the last argument to the <code>celerity::handler::parallel_for</code> function -
+again concisely written as a lambda expression. Let us continue by fleshing
+out the kernel code. Replace the TODO with the following code:</p>
+<pre><code class="hljs css language-cpp"><span class="token keyword">int</span> sum <span class="token operator">=</span> r_input<span class="token punctuation">[</span><span class="token punctuation">{</span>item<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> item<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">}</span><span class="token punctuation">]</span> <span class="token operator">+</span> r_input<span class="token punctuation">[</span><span class="token punctuation">{</span>item<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> item<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">}</span><span class="token punctuation">]</span>
+        <span class="token operator">+</span> r_input<span class="token punctuation">[</span><span class="token punctuation">{</span>item<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> item<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">]</span> <span class="token operator">+</span> r_input<span class="token punctuation">[</span><span class="token punctuation">{</span>item<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> item<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+dw_edge<span class="token punctuation">[</span>item<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">255</span> <span class="token operator">-</span> std<span class="token operator">::</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> sum <span class="token operator">-</span> <span class="token punctuation">(</span><span class="token number">4</span> <span class="token operator">*</span> r_input<span class="token punctuation">[</span>item<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This kernel computes a <a href="https://en.wikipedia.org/wiki/Discrete_Laplace_operator">discrete Laplace
+filter</a> - a simple
+type of edge detection filter - by summing up the four pixel values along the
+main axes surrounding the current result pixel and computing the difference
+to the current pixel value. Lastly we subtract the resulting value from the
+maximum value a <code>uint8_t</code> can store (255) in order to get a white image with
+black edges. The current pixel position is described by the
+<code>cl::sycl::item&lt;2&gt;</code> we receive as an argument to our kernel function. This
+two-dimensional item corresponds to a <code>y/x</code> position in our input and output
+images and can be used to index into the respective buffers. However, we're
+not using the buffers directly; instead we are indexing into the
+aforementioned buffer accessors. Let's create these now - replace the TODO
+before the kernel function with the following:</p>
+<pre><code class="hljs css language-cpp"><span class="token keyword">auto</span> r_input <span class="token operator">=</span> input_buf<span class="token punctuation">.</span>get_access<span class="token operator">&lt;</span>cl<span class="token operator">::</span>sycl<span class="token operator">::</span>access<span class="token operator">::</span>mode<span class="token operator">::</span>read<span class="token operator">></span><span class="token punctuation">(</span>cgh<span class="token punctuation">,</span> celerity<span class="token operator">::</span>access<span class="token operator">::</span>neighborhood<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">auto</span> dw_edge <span class="token operator">=</span> edge_buf<span class="token punctuation">.</span>get_access<span class="token operator">&lt;</span>cl<span class="token operator">::</span>sycl<span class="token operator">::</span>access<span class="token operator">::</span>mode<span class="token operator">::</span>discard_write<span class="token operator">></span><span class="token punctuation">(</span>cgh<span class="token punctuation">,</span> celerity<span class="token operator">::</span>access<span class="token operator">::</span>one_to_one<span class="token operator">&lt;</span><span class="token number">2</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>If you have worked with SYCL before, these buffer accessors will look
+familiar to you. The template parameter is called the <strong>access mode</strong> and
+declares the type of access we inted to make on each buffer: We want to
+<code>read</code> from our <code>input_buf</code>, and want to write to our <code>edge_buf</code>. While
+there is a <code>write</code> access mode, we do not care at all about preserving any of
+the previous contents of <code>edge_buf</code>, which is why we choose to discard them
+and use the <code>discard_write</code> access mode.</p>
+<p>So far everything works exactly as it would in a SYCL application. However,
+there is a second parameter passed into the <code>celerity::buffer::get_access</code>
+function that is not present in its SYCL counterpart. In fact, this parameter
+represents one of Celerity's most important API additions: While access modes
+tell the runtime system how a kernel intends to access a buffer, it does not
+include any information about <em>where</em> a kernel will access said buffer. In
+order for Celerity to be able to split a single kernel execution across
+potentially many different worker nodes, it needs to know how each of those
+<strong>kernel chunks</strong> will interact with the input and output buffers of a kernel
+-- i.e., which node requires which parts of the input, and produces which
+parts of the output. This is where Celerity's so-called <strong>range mappers</strong>
+come into play.</p>
+<p>Let us first discuss the range mapper for <code>edge_buf</code>, as it represents the
+simpler of the two cases. Looking at the kernel function, you can see that
+for each invocation of the kernel -- i.e., for each work item, we only ever
+access the output buffer once: at exactly the current location represented by
+the <code>item</code>. This means there exists a one-to-one mapping of the kernel index
+and the accessed buffer index. For this reason we pass a
+<code>celerity::access::one-to-one&lt;2&gt;</code> range mapper (where the <code>2</code> simply means
+that we are operating on two-dimensional kernels and buffers).</p>
+<p>The range mapper for our <code>input_buf</code> is a bit more complicated, but not by
+much: Remember that for computing the Laplace filter, we are summing up the
+pixel values of the four surrounding pixels along the main axes and
+calculating the difference to the current pixel. This means that in addition
+to reading the pixel value associated with each item, each kernel thread also
+reads a 1-pixel <em>neighborhood</em> around the current item. This being another
+very common pattern, it can be expressed with the
+<code>celerity::access::neighborhood</code> range mapper. The parameters <code>(1, 1)</code>
+signify that we want to access a 1-item boundary in each dimension
+surrounding the current work item.</p>
+<blockquote>
+<p>While we are using built-in range mappers provided by the Celerity API,
+they can in fact also be user-defined functions! For more information on
+range mappers, see <a href="/docs/range-mappers">Range Mappers</a>.</p>
+</blockquote>
+<p>Lastly, there are two more things of note for the call to <code>parallel_for</code>: The
+first is the <strong>kernel name</strong>. Just like in SYCL, each kernel function in
+Celerity has to have a unique name in the form of a template type parameter.
+Here we chose <code>MyEdgeDetectionKernel</code>, but this can be anything you like.
+Finally, the first two parameters to the <code>parallel_for</code> function tell
+Celerity how many individual GPU threads (or work items) we want to execute.
+In our case we want to execute one thread for each pixel of our image, except
+for an 1-pixel border on the outside of the image - which is why we subtract
+1 from our image size in both dimensions and additionally specify the
+execution offset of <code>(1, 1)</code>. <em>Why</em> this is a good idea is left as an
+exercise for the reader ;-).</p>
+<p>...and that's it, we successfully submitted a kernel to compute an edge
+detection filter on our input image and store the result in an output buffer.
+The only thing that remains to do now is to save the resulting image back to
+a file.</p>
+<h2><a class="anchor" aria-hidden="true" id="saving-the-result"></a><a href="#saving-the-result" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Saving The Result</h2>
+<p>To write the image resulting from our kernel execution back to a file, we
+first have to obtain the full <code>edge_buf</code> back on the host. While in SYCL we
+could create a <em>host accessor</em> to do so, the semantics of distributed memory
+execution as well as the Celerity execution model cannot support host
+accessors while guaranteeing reasonable performance and scalability on larger
+clusters. Instead, Celerity provides a special construct for such scenarios:
+So-called <strong>master-access tasks</strong>. Just like kernel command group submissions
+(which are also considered Celerity <em>tasks</em>, by the way), master-access tasks
+are created on the distributed queue. Add the following code at the end of
+our <code>main()</code> function:</p>
+<pre><code class="hljs css language-cpp">queue<span class="token punctuation">.</span><span class="token function">with_master_access</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">=</span><span class="token punctuation">]</span><span class="token punctuation">(</span>celerity<span class="token operator">::</span>handler<span class="token operator">&amp;</span> cgh<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">auto</span> out <span class="token operator">=</span> edge_buf<span class="token punctuation">.</span>get_access<span class="token operator">&lt;</span>cl<span class="token operator">::</span>sycl<span class="token operator">::</span>access<span class="token operator">::</span>mode<span class="token operator">::</span>read<span class="token operator">></span><span class="token punctuation">(</span>cgh<span class="token punctuation">,</span> edge_buf<span class="token punctuation">.</span><span class="token function">get_range</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cgh<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">=</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">stbi_write_png</span><span class="token punctuation">(</span><span class="token string">"result.png"</span><span class="token punctuation">,</span> img_width<span class="token punctuation">,</span> img_height<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> out<span class="token punctuation">.</span><span class="token function">get_pointer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Just as in kernel command group functions, we first obtain accessors for the
+buffers we want to operate on during this master-access. Instead of a range
+mapper however, we simply specify the range of the buffer we want to access
+-- in this case the entire buffer. Then, we provide a callback function to
+<code>celerity::handler::run</code>, which will be executed once the data is available.</p>
+<p>As the name implies, this function is only called on one node -- the master
+node. And unlike kernel functions, the master-access function is executed on
+the host, allowing us to use it for things such as result verification and I/O.
+In this case, we use <code>stbi_write_png</code> to write our resulting image into a
+file called <code>result.png</code>.</p>
+<blockquote>
+<p><strong>Note:</strong> While master-access tasks currently fulfill an important role in
+most Celerity applications, we ultimately plan to retire them in favor of a
+more comprehensive and scalable distributed I/O solution.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="running-the-application"></a><a href="#running-the-application" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Running The Application</h2>
+<p>After you've built the executable, you can try and run it by passing an image
+file as a command line argument like so:</p>
+<pre><code class="hljs"><span class="hljs-string">./edge_detection</span> <span class="hljs-string">./my_image.jpg</span>
+</code></pre>
+<p>If all goes well, a result file named <code>output.png</code> should then be located in
+your working directory.</p>
+<p>Since Celerity applications are built on top of MPI internally, you can now
+also try and run multiple nodes:</p>
+<pre><code class="hljs">mpirun -n <span class="hljs-number">4</span> edge_detection ./my_image<span class="hljs-selector-class">.jpg</span>
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/installation"><span class="arrow-prev">← </span><span>Installation</span></a><a class="docs-next button" href="/docs/range-mappers"><span>Range Mappers</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#setting-up-a-cmake-project">Setting Up a CMake Project</a></li><li><a href="#image-handling-boilerplate">Image Handling Boilerplate</a></li><li><a href="#celerity-queue-and-buffers">Celerity Queue and Buffers</a></li><li><a href="#detecting-those-edges">Detecting Those Edges</a></li><li><a href="#saving-the-result">Saving The Result</a></li><li><a href="#running-the-application">Running The Application</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/celerity_icon.png" alt="Celerity"/></a><div><h5>Docs</h5><a href="/docs/getting-started">Getting Started</a><a href="/docs/installation">Installation</a><a href="/docs/issues-and-limitations">Issues &amp; Limitations</a></div><div><h5>Community</h5><a href="https://stackoverflow.com/questions/tagged/celerity-hpc" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://discord.gg/k8vWTPB">Celerity Chat</a></div><div><h5>More</h5><a href="https://github.com/celerity/celerity-runtime" target="_blank" rel="noopener noreferrer">GitHub</a><a class="github-button" href="https://github.com/celerity/celerity-runtime" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Distributed and Parallel Systems Group, University of Innsbruck</section><section class="copyright">SYCL and the SYCL logo are trademarks of the Khronos Group Inc.</section></footer></div></body></html>

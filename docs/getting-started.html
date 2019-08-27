@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Getting Started · Celerity</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Celerity allows you to write highly parallel applications that can be run on"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Getting Started · Celerity"/><meta property="og:type" content="website"/><meta property="og:url" content="https://celerity.github.io/"/><meta property="og:description" content="Celerity allows you to write highly parallel applications that can be run on"/><meta property="og:image" content="https://celerity.github.io/img/celerity_og_image.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://celerity.github.io/img/celerity_twitter_image.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/prism.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/celerity_icon.png" alt="Celerity"/><h2 class="headerTitleWithLogo">Celerity</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive siteNavItemActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="https://github.com/celerity/celerity-runtime" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Introduction</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem navListItemActive"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/installation">Installation</a></li><li class="navListItem"><a class="navItem" href="/docs/tutorial">Tutorial</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/range-mappers">Range Mappers</a></li><li class="navListItem"><a class="navItem" href="/docs/pitfalls">Common Pitfalls</a></li><li class="navListItem"><a class="navItem" href="/docs/issues-and-limitations">Issues &amp; Limitations</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Celerity In-Depth</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/core-principles">Core Principles</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Getting Started</h1></header><article><div><span><p>Celerity allows you to write highly parallel applications that can be run on
+a cluster of accelerator nodes. It focuses on providing a way of scaling
+applications to many nodes without having to be an expert in cluster
+programming. In fact, the Celerity API does not make it apparent that a program is
+(potentially) running on many nodes at all: There is no notion of <em>ranks</em>;
+partitioning of work and data is taken care of transparently behind the scenes.
+This lets you focus on your actual work, without having to concern yourself with the
+complexities of modern distributed memory cluster programming.</p>
+<p>While ease of use is one of Celerity's main goals, simplicity can only go so
+far without sacrificing considerable performance. Proficiency in modern C++
+as well as at least a rough understanding of how accelerator (GPU) programming
+differs to parallel CPU programming is required to make efficient use of Celerity.
+Lastly, you will require a good understanding of the algorithms and techniques you
+intend to implement using Celerity in order for the runtime system to be able
+to run it on a cluster both correctly and in an efficient manner.</p>
+<p>Celerity is built on top of <a href="https://www.khronos.org/sycl/">SYCL</a>, an
+open-standard high-level C++ embedded domain specific language for
+programming accelerators. SYCL provides a great API that hits a sweet spot
+between expressiveness and power as well as ease of use, making it the
+perfect starting point for Celerity: We set out to find the minimal set of
+extensions required to bring the SYCL API to distributed memory clusters -
+thus making it relatively easy to migrate an existing SYCL application to
+Celerity. If you don't have any experience with SYCL, don't worry, as we will
+introduce the most important concepts along the way.</p>
+<p>If this piqued your interest and you would like to try it for yourself, check
+out the <a href="/docs/installation">Installation</a> section on how to build and install
+Celerity. For a complete example of how to set up a Celerity application from
+start to finish, see the <a href="/docs/tutorial">Tutorial</a>.</p>
+<p>For more information on the overall Celerity API as well as the driving
+principles behind its design, please see our Celerity in-depth
+<a href="/docs/overview">Overview</a> section.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-next button" href="/docs/installation"><span>Installation</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/celerity_icon.png" alt="Celerity"/></a><div><h5>Docs</h5><a href="/docs/getting-started">Getting Started</a><a href="/docs/installation">Installation</a><a href="/docs/issues-and-limitations">Issues &amp; Limitations</a></div><div><h5>Community</h5><a href="https://stackoverflow.com/questions/tagged/celerity-hpc" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://discord.gg/k8vWTPB">Celerity Chat</a></div><div><h5>More</h5><a href="https://github.com/celerity/celerity-runtime" target="_blank" rel="noopener noreferrer">GitHub</a><a class="github-button" href="https://github.com/celerity/celerity-runtime" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Distributed and Parallel Systems Group, University of Innsbruck</section><section class="copyright">SYCL and the SYCL logo are trademarks of the Khronos Group Inc.</section></footer></div></body></html>
