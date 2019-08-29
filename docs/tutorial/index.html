@@ -64,8 +64,8 @@ filesystem. Here you can see how a result might look (white parts):</p>
 <p><a href="https://commons.wikimedia.org/wiki/File:Wiesenknopf_Bl%C3%BCte_6260037-PSD-PSD.jpg">Original image</a> by Reinhold Möller (CC-BY-SA 4.0).</p>
 <h2><a class="anchor" aria-hidden="true" id="setting-up-a-cmake-project"></a><a href="#setting-up-a-cmake-project" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting Up a CMake Project</h2>
 <p>The first thing you typically want to do when writing a Celerity application
-is to setup a CMake project. For this, create a new folder for your project and in it create a
-file <code>CMakeLists.txt</code> with the following contents:</p>
+is to set up a CMake project. For this, create a new folder for your project
+and in it create a file <code>CMakeLists.txt</code> with the following contents:</p>
 <pre><code class="hljs css language-cmake"><span class="hljs-keyword">cmake_minimum_required</span>(VERSION <span class="hljs-number">3.5</span>.<span class="hljs-number">1</span>)
 <span class="hljs-keyword">project</span>(celerity_edge_detection)
 
@@ -120,7 +120,7 @@ everything works so far.</p>
 our application. The first thing that we will require in any Celerity program
 is the <strong>distributed queue</strong>. Similar to how a SYCL queue allows you to
 submit work to a compute device, the Celerity distributed queue allows you to
-submit work to the distributed runtime system - which will subsequently be
+submit work to the distributed runtime system -- which will subsequently be
 split transparently across all available worker nodes.</p>
 <p>Additionally, we will require <strong>buffers</strong> to store our input image as well as
 the resulting edge-detected image in a way that can be efficiently accessed
@@ -134,7 +134,7 @@ celerity<span class="token operator">::</span>buffer<span class="token operator"
 celerity<span class="token operator">::</span>distr_queue queue<span class="token punctuation">;</span>
 <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 </code></pre>
-<p>With this we've created two 2-dimensional buffers, <code>input_buf</code> and
+<p>With this we've created a couple of two-dimensional buffers, <code>input_buf</code> and
 <code>edge_buf</code>, that both store values of type <code>uint8_t</code> and are of size
 <code>(img_height, img_width)</code>. Notice that we initialize <code>input_buf</code> using the
 image data that we've just read. We can then immediately free the raw image,
@@ -181,7 +181,7 @@ dw_edge<span class="token punctuation">[</span>item<span class="token punctuatio
 filter</a> - a simple
 type of edge detection filter - by summing up the four pixel values along the
 main axes surrounding the current result pixel and computing the difference
-to the current pixel value. Lastly we subtract the resulting value from the
+to the current pixel value. We then subtract the resulting value from the
 maximum value a <code>uint8_t</code> can store (255) in order to get a white image with
 black edges. The current pixel position is described by the
 <code>cl::sycl::item&lt;2&gt;</code> we receive as an argument to our kernel function. This
@@ -218,7 +218,7 @@ for each invocation of the kernel -- i.e., for each work item, we only ever
 access the output buffer once: at exactly the current location represented by
 the <code>item</code>. This means there exists a one-to-one mapping of the kernel index
 and the accessed buffer index. For this reason we pass a
-<code>celerity::access::one-to-one&lt;2&gt;</code> range mapper (where the <code>2</code> simply means
+<code>celerity::access::one_to_one&lt;2&gt;</code> range mapper (where the <code>2</code> simply means
 that we are operating on two-dimensional kernels and buffers).</p>
 <p>The range mapper for our <code>input_buf</code> is a bit more complicated, but not by
 much: Remember that for computing the Laplace filter, we are summing up the
@@ -260,7 +260,7 @@ clusters. Instead, Celerity provides a special construct for such scenarios:
 So-called <strong>master-access tasks</strong>. Just like kernel command group submissions
 (which are also considered Celerity <em>tasks</em>, by the way), master-access tasks
 are created on the distributed queue. Add the following code at the end of
-our <code>main()</code> function:</p>
+your <code>main()</code> function:</p>
 <pre><code class="hljs css language-cpp">queue<span class="token punctuation">.</span><span class="token function">with_master_access</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">=</span><span class="token punctuation">]</span><span class="token punctuation">(</span>celerity<span class="token operator">::</span>handler<span class="token operator">&amp;</span> cgh<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">auto</span> out <span class="token operator">=</span> edge_buf<span class="token punctuation">.</span>get_access<span class="token operator">&lt;</span>cl<span class="token operator">::</span>sycl<span class="token operator">::</span>access<span class="token operator">::</span>mode<span class="token operator">::</span>read<span class="token operator">></span><span class="token punctuation">(</span>cgh<span class="token punctuation">,</span> edge_buf<span class="token punctuation">.</span><span class="token function">get_range</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     cgh<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">=</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
