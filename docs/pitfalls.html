@@ -72,7 +72,7 @@ in undefined behavior:</p>
 <p>Celerity tasks submitted to the <code>celerity::distr_queue</code> are executed
 <em>asynchronously</em> at a later point in time. This means that the stack
 surrounding a Celerity command group function or master-access function might
-have been unwound by the time it being called.</p>
+have been unwound by the time it is being called.</p>
 <p>For this reason Celerity by default enforces that tasks only capture
 surrounding variables by value, rather than by reference. If you know what
 you are doing and would like to disable this check, you can define the
