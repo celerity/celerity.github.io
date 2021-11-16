@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Reductions · Celerity</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Celerity implements cluster-wide reductions in the spirit of"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Reductions · Celerity"/><meta property="og:type" content="website"/><meta property="og:url" content="https://celerity.github.io/"/><meta property="og:description" content="Celerity implements cluster-wide reductions in the spirit of"/><meta property="og:image" content="https://celerity.github.io/img/celerity_og_image.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://celerity.github.io/img/celerity_twitter_image.png"/><link rel="shortcut icon" href="/img/favicon.ico"/><link rel="stylesheet" href="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/prism.css"/><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/celerity_icon.png" alt="Celerity"/><h2 class="headerTitleWithLogo">Celerity</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/getting-started" target="_self">Docs</a></li><li class=""><a href="/contribute" target="_self">Contribute</a></li><li class=""><a href="https://github.com/celerity/celerity-runtime" target="_self">GitHub</a></li><li class="navSearchWrapper reactNavSearchWrapper"><input type="text" id="search_input_react" placeholder="Search" title="Search"/></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Guides</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/getting-started">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/installation">Installation</a></li><li class="navListItem"><a class="navItem" href="/docs/tutorial">Tutorial</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/range-mappers">Range Mappers</a></li><li class="navListItem"><a class="navItem" href="/docs/host-tasks">Host Tasks</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/reductions">Reductions</a></li><li class="navListItem"><a class="navItem" href="/docs/pitfalls">Common Pitfalls</a></li><li class="navListItem"><a class="navItem" href="/docs/issues-and-limitations">Issues &amp; Limitations</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Celerity In-Depth</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/docs/core-principles">Core Principles</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Reductions</h1></header><article><div><span><p>Celerity implements cluster-wide reductions in the spirit of
+<a href="https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html#sec:reduction">SYCL 2020 reduction variables</a>.</p>
+<p>The following distributed program computes the sum from 0 to 999 in <code>sum_buf</code> using a reduction:</p>
+<pre><code class="hljs css language-c++">celerity::distr_queue q;
+celerity::<span class="hljs-built_in">buffer</span>&lt;<span class="hljs-keyword">size_t</span>, <span class="hljs-number">1</span>&gt; sum_buf{{<span class="hljs-number">1</span>}};
+q.submit([=](celerity::handler&amp; cgh) {
+    <span class="hljs-keyword">auto</span> rd = celerity::reduction(sum_buf, cgh, sycl::plus&lt;<span class="hljs-keyword">size_t</span>&gt;{},
+                                  celerity::property::reduction::initialize_to_identity{});
+    cgh.parallel_for(celerity::range&lt;<span class="hljs-number">1</span>&gt;{<span class="hljs-number">1000</span>}, rd,
+                     [=](celerity::item&lt;<span class="hljs-number">1</span>&gt; item, <span class="hljs-keyword">auto</span>&amp; sum) { sum += item.get_id(<span class="hljs-number">0</span>); });
+});
+</code></pre>
+<p>A reduction output buffer can have any dimensionality, but must be unit-sized. Like buffer requirements, the result of
+such a reduction is made available on nodes as needed, so the Celerity API does not distinguish between <code>Reduce</code> and
+<code>Allreduce</code> operations like MPI does.</p>
+<p>In Celerity, every reduction operation must have a known identity. For
+<a href="https://www.khronos.org/registry/SYCL/specs/sycl-2020/html/sycl-2020.html#sec:function-objects">SYCL function objects</a>
+these are known implicitly, for user-provided functors like lambdas, an explicit identity must be provided:</p>
+<pre><code class="hljs css language-c++"><span class="hljs-keyword">auto</span> parity = [](<span class="hljs-keyword">unsigned</span> a, <span class="hljs-keyword">unsigned</span> b) { <span class="hljs-keyword">return</span> (a ^ b) &amp; <span class="hljs-number">1u</span>; };
+<span class="hljs-keyword">auto</span> rd = celerity::reduction(buf, cgh, parity, <span class="hljs-number">0u</span> <span class="hljs-comment">/* explicit identity */</span>,
+                              celerity::property::reduction::initialize_to_identity{});
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="limitations"></a><a href="#limitations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Limitations</h2>
+<h3><a class="anchor" aria-hidden="true" id="only-scalar-reductions"></a><a href="#only-scalar-reductions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Only Scalar Reductions</h3>
+<p>Currently, the SYCL standard only mandates scalar reductions, i.e. reductions that produce a single scalar value.
+While that is useful for synchronization work like terminating a loop on a stopping criterion, it is not enough for
+other common operations like histogram construction. Since Celerity delegates to SYCL for intra-node reductions,
+higher-dimensional reduction outputs will only become available once SYCL supports them.</p>
+<h3><a class="anchor" aria-hidden="true" id="no-broad-support-across-sycl-implementations"></a><a href="#no-broad-support-across-sycl-implementations" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>No Broad Support Across SYCL Implementations</h3>
+<p>Only hipSYCL provides a complete implementation of SYCL 2020 reduction variables at the moment, but
+requires <a href="https://github.com/illuhad/hipSYCL/pull/578">a patch</a>. Installing this version of hipSYCL will
+enable you to run the <code>reduction</code> Celerity example.</p>
+<p>DPC++ currently implements an incompatible version of reductions from an earlier Intel proposal.
+Celerity can partially work around this API difference, but not without limitations:</p>
+<ul>
+<li>Reduction output buffers can only be 1-dimensional</li>
+<li>Calls to <code>parallel_for</code> can receive at most one reduction</li>
+</ul>
+<p>ComputeCpp does not support reductions at all as of version 2.6.0, so Celerity does not expose them for this backend.</p>
+<p>Celerity provides feature-detection macros for reduction support, both in CMake (<code>ON</code> or <code>OFF</code>) and
+as C++ macros (always defined to <code>0</code> or <code>1</code>):</p>
+<ul>
+<li><code>CELERITY_FEATURE_SIMPLE_SCALAR_REDUCTIONS</code> for (at least) the limited reduction support provided
+by DPC++.</li>
+<li><code>CELERITY_FEATURE_SCALAR_REDUCTIONS</code> for the full reduction support provided by a 2020-conformant
+SYCL implementation. Implies <code>CELERITY_FEATURE_SIMPLE_SCALAR_REDUCTIONS</code>.</li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/host-tasks"><span class="arrow-prev">← </span><span>Host Tasks</span></a><a class="docs-next button" href="/docs/pitfalls"><span>Common Pitfalls</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#limitations">Limitations</a><ul class="toc-headings"><li><a href="#only-scalar-reductions">Only Scalar Reductions</a></li><li><a href="#no-broad-support-across-sycl-implementations">No Broad Support Across SYCL Implementations</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/celerity_icon.png" alt="Celerity"/></a><div><h5>Docs</h5><a href="/docs/getting-started">Getting Started</a><a href="/docs/installation">Installation</a><a href="/docs/issues-and-limitations">Issues &amp; Limitations</a></div><div><h5>Community</h5><a href="https://stackoverflow.com/questions/tagged/celerity-hpc" target="_blank" rel="noreferrer noopener">Stack Overflow</a><a href="https://discord.gg/k8vWTPB">Celerity Chat</a></div><div><h5>More</h5><a href="/research">Celerity Research</a><a href="https://github.com/celerity/celerity-runtime" target="_blank" rel="noopener noreferrer">GitHub</a><a class="github-button" href="https://github.com/celerity/celerity-runtime" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2021 Distributed and Parallel Systems Group, University of Innsbruck</section><section class="copyright">SYCL and the SYCL logo are trademarks of the Khronos Group Inc.</section></footer></div><script type="text/javascript" src="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script><script>
+                document.addEventListener('keyup', function(e) {
+                  if (e.target !== document.body) {
+                    return;
+                  }
+                  // keyCode for '/' (slash)
+                  if (e.keyCode === 191) {
+                    const search = document.getElementById('search_input_react');
+                    search && search.focus();
+                  }
+                });
+              </script><script>
+              var search = docsearch({
+                
+                apiKey: '87af380bf99bc4a1062f993db5a2c0df',
+                indexName: 'celerity',
+                inputSelector: '#search_input_react'
+              });
+            </script></body></html>
