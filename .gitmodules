@@ -1,0 +1,3 @@
+[submodule "celerity-runtime"]
+	path = celerity-runtime
+	url = https://github.com/celerity/celerity-runtime.git

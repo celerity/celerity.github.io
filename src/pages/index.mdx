@@ -1,0 +1,64 @@
+---
+title: High-Level C++ for Accelerated Clusters
+---
+
+import ThemedImage from "@theme/ThemedImage";
+import CodeBlock from "@theme/CodeBlock";
+
+<div style={{ textAlign: "center" }}>
+  <ThemedImage
+    sources={{
+      light: "img/celerity_logo.svg",
+      dark: "img/celerity_logo_dark.svg",
+    }}
+    alt="Celerity Logo"
+  />
+</div>
+
+<div className="text--center padding-vert--lg">
+  Celerity aims to bring the power and ease of use of
+  [SYCL](https://www.khronos.org/sycl) to distributed memory accelerator
+  clusters.
+  <a
+    href="/docs/getting-started"
+    className="button button--outline button--primary"
+  >
+    {"Get Started"}
+  </a>
+</div>
+
+<div className="welcome-code-sample">
+
+```cpp title="Complete Celerity code sample for distributed multi-GPU matrix-vector multiplication"
+#include <celerity.h>
+using namespace celerity;
+
+// naive, but distributed matrix-vector multiplication!
+int main() {
+    // (1) declare virtualized input and output buffers
+    constexpr size_t size = 256;
+    buffer<float, 2> matrix{{size, size}};
+    buffer<float, 1> vector{{size}};
+    buffer<float, 1> result{{size}};
+
+    distr_queue q;
+    q.submit([&](handler &cgh) {
+        // (2) specify data access patterns to enable distributed execution
+        accessor m(matrix, cgh, [size](chunk<1> chnk) {
+            return subrange<2>({chnk.offset[0], 0}, {chnk.range[0], size});
+        }, read_only);
+        accessor v(vector, cgh, access::one_to_one(), read_only);
+        accessor r(result, cgh, access::one_to_one(), write_only, no_init);
+
+        // (3) launch the parallel computation
+        cgh.parallel_for(range<1>(size), [=](item<1> item) {
+            r[item] = 0;
+            for (size_t i = 0; i < size; ++i) {
+                r[item] += m[item.get_id(0)][i] * v[i];
+            }
+        });
+    });
+}
+```
+
+</div>
