@@ -130,7 +130,7 @@ module.exports = {
     },
     algolia: {
       appId: "XBORHFUOA7",
-      apiKey: "9423b4ae2ee3d38f974af875d47b1bf4",
+      apiKey: "b30e6987826441c7179e251fe3efa23b",
       indexName: "celerity"
     }
   }
