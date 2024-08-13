@@ -1,0 +1,1 @@
+"complete"!==document.readyState?window.addEventListener("load",(function(){hljs.highlightAll()})):window.setTimeout((function(){hljs.highlightAll()}),500);
