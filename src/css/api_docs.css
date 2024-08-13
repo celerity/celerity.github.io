@@ -27,6 +27,14 @@
 [data-theme="dark"] .hdoc-private::after {
   background: #242424;
 }
+/* Also style member variable descriptions */
+dt.hdoc-private + dd {
+  opacity: 0.5;
+}
+dt.hdoc-private:hover + dd,
+dt.hdoc-private + dd:hover {
+  opacity: 1;
+}
 
 .hdoc-protected {
   opacity: 0.75;
@@ -44,6 +52,14 @@
 }
 [data-theme="dark"] .hdoc-protected::after {
   background: #242424;
+}
+/* Also style member variable descriptions */
+dt.hdoc-protected + dd {
+  opacity: 0.75;
+}
+dt.hdoc-protected:hover + dd,
+dt.hdoc-protected + dd:hover {
+  opacity: 1;
 }
 
 .hdoc-detail {
