@@ -41,7 +41,7 @@ int main() {
     buffer<float, 1> vector{{size}};
     buffer<float, 1> result{{size}};
 
-    distr_queue q;
+    queue q;
     q.submit([&](handler &cgh) {
         // (2) specify data access patterns to enable distributed execution
         accessor m(matrix, cgh, [size](chunk<1> chnk) {
@@ -54,7 +54,7 @@ int main() {
         cgh.parallel_for(range<1>(size), [=](item<1> item) {
             r[item] = 0;
             for (size_t i = 0; i < size; ++i) {
-                r[item] += m[item.get_id(0)][i] * v[i];
+                r[item] += m[item.get_id(0)][i] * v[item];
             }
         });
     });

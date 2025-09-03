@@ -6,6 +6,20 @@ import { Container, Row, Column } from "../grid";
 const publications = [
   {
     title:
+      "A High-Level API for Dynamic Load Balancing in Large-Scale Parameter Sweeps",
+    authors: "Philip Salzmann, Peter Thoman, and Thomas Fahringer",
+    publishedAt: "International Journal of Parallel Programming, 2025",
+    doi: "10.1007/s10766-025-00804-4",
+  },
+  {
+    title:
+      "Celerity-RSim: Porting Light Propagation Simulation to Accelerator Clusters Using a High-Level API",
+    authors: "Peter Thoman, Philipp Gschwandtner, Facundo Molina Heredina, and Thomas Fahringer",
+    publishedAt: "IJPP, 2025",
+    doi: "10.1007/s10766-025-00787-2",
+  },
+  {
+    title:
       "Balancing Tracking Granularity and Parallelism in Many-Task Systems: The Horizons Approach",
     authors: "Peter Thoman, Philip Salzmann",
     publishedAt: "SN Computer Science, 2024",
@@ -63,6 +77,13 @@ const publications = [
 ];
 
 const events = [
+  {
+    title:
+      "Celerity - SYCL-Based High-Productivity Development at HPC Scale",
+    authors: "Peter Thoman",
+    info: "PASC 2025",
+    slides: "https://zenodo.org/records/15730770"
+  },
   {
     title:
       "A High-Level API for Dynamic Load Balancing in Large-Scale Parameter Sweeps",
@@ -149,6 +170,17 @@ function formatVid(vid) {
   );
 }
 
+function formatSlides(slides) {
+  if (slides == null) return "";
+  return (
+      <strong>
+        <a href={slides} target="_blank">
+          Slides
+        </a>
+      </strong>
+  );
+}
+
 const Highlights = () => (
   <Row className="margin-vert--lg">
     <Column size={6}>
@@ -166,7 +198,7 @@ const Highlights = () => (
     </Column>
     <Column size={6}>
       <h2>Selected Talks & Demos</h2>
-      {events.map(({ title, authors, info, video }) => (
+      {events.map(({ title, authors, info, video, slides}) => (
         <div key={title} className="margin-bottom--lg">
           <h3 className="margin-bottom--none">{title}</h3>
           <div>{authors}</div>
@@ -174,6 +206,7 @@ const Highlights = () => (
             <strong>{info}</strong>
           </div>
           {formatVid(video)}
+          {formatSlides(slides)}
         </div>
       ))}
     </Column>
