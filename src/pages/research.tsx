@@ -6,6 +6,29 @@ import { Container, Row, Column } from "../grid";
 const publications = [
   {
     title:
+      "A High-Level API for End-to-End Data Compression in Multi-GPU Cluster Applications",
+    authors: "Gabriel Mitterrutzner, Peter Thoman and Philipp Gschwandtner",
+    publishedAt: "International Journal of Parallel Programming, 2026",
+    doi: "10.1007/s10766-026-00818-6",
+  },
+  {
+    title:
+      "A Portable Compiler-Runtime Approach for Scalability Prediction",
+    authors:
+      "Nicolai Stawinoga, Sohan Lal, Biagio Cosenza, Philip Salzmann, Peter Thoman, and Thomas Fahringer",
+    publishedAt: "Future Generation Computer Systems, 2025",
+    doi: "10.1016/j.future.2025.108337",
+  },
+  {
+    title:
+      "Bridging usability and performance: High-level abstractions for advanced accelerator cluster programming",
+    authors:
+      "Philip Salzmann, Fabian Knorr, Peter Thoman, Philipp Gschwandtner, and Thomas Fahringer",
+    publishedAt: "Future Generation Computer Systems, 2025",
+    doi: "10.1016/j.future.2025.108222",
+  },
+  {
+    title:
       "A High-Level API for Dynamic Load Balancing in Large-Scale Parameter Sweeps",
     authors: "Philip Salzmann, Peter Thoman, and Thomas Fahringer",
     publishedAt: "International Journal of Parallel Programming, 2025",
@@ -77,6 +100,12 @@ const publications = [
 ];
 
 const events = [
+  {
+    title:
+      "Concurrent Scheduling of High-Level Parallel Programs on Multi-GPU Systems",
+    authors: "Peter Thoman",
+    info: "HLPP 2026",
+  },
   {
     title:
       "Celerity - SYCL-Based High-Productivity Development at HPC Scale",
@@ -173,11 +202,11 @@ function formatVid(vid) {
 function formatSlides(slides) {
   if (slides == null) return "";
   return (
-      <strong>
-        <a href={slides} target="_blank">
-          Slides
-        </a>
-      </strong>
+    <strong>
+      <a href={slides} target="_blank">
+        Slides
+      </a>
+    </strong>
   );
 }
 
@@ -198,7 +227,7 @@ const Highlights = () => (
     </Column>
     <Column size={6}>
       <h2>Selected Talks & Demos</h2>
-      {events.map(({ title, authors, info, video, slides}) => (
+      {events.map(({ title, authors, info, video, slides }) => (
         <div key={title} className="margin-bottom--lg">
           <h3 className="margin-bottom--none">{title}</h3>
           <div>{authors}</div>
